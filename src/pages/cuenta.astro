@@ -1,0 +1,134 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+
+<BaseLayout title="Tu cuenta — CervezaArtesana" description="Ingresar o gestionar tu cuenta">
+  <section class="max-w-lg mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Tu cuenta</h1>
+
+    <noscript>
+      <div class="rounded-lg border p-6 my-4">
+        Necesitas habilitar JavaScript para iniciar sesión.
+      </div>
+    </noscript>
+
+    <!-- Estado: no logueado (VISIBLE por defecto) -->
+    <div id="logged-out" class="rounded-lg border p-6 space-y-4">
+      <p class="text-slate-600">Inicia sesión para guardar tu carrito y avanzar con el pago.</p>
+      <button id="btn-google" class="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+        Continuar con Google
+      </button>
+      <p id="auth-error" class="text-sm text-red-600 hidden"></p>
+    </div>
+
+    <!-- Estado: logueado (oculto hasta que Auth confirme) -->
+    <div id="logged-in" class="rounded-lg border p-6 space-y-4 hidden">
+      <div class="flex items-center gap-3">
+        <img id="user-photo" src="" alt="Avatar" class="h-10 w-10 rounded-full border object-cover" />
+        <div>
+          <p class="font-semibold" id="user-name"></p>
+          <p class="text-sm text-slate-500" id="user-email"></p>
+        </div>
+      </div>
+
+      <div class="rounded-md bg-slate-50 p-4 text-sm text-slate-700">
+        Tu carrito se sincroniza automáticamente con tu cuenta.
+      </div>
+
+      <div class="flex gap-3">
+        <a id="go-checkout" href="/checkout"
+           class="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+          Ir a Pagar
+        </a>
+        <button id="btn-logout"
+                class="rounded-md border px-4 py-2 font-medium hover:bg-slate-50">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    const out = document.getElementById("logged-out");
+    const inBox = document.getElementById("logged-in");
+    const btnGoogle = document.getElementById("btn-google");
+    const btnLogout = document.getElementById("btn-logout");
+    const nameEl = document.getElementById("user-name");
+    const emailEl = document.getElementById("user-email");
+    const photoEl = document.getElementById("user-photo");
+    const goCheckout = document.getElementById("go-checkout");
+    const errEl = document.getElementById("auth-error");
+
+    function showOut() {
+      inBox?.classList.add("hidden");
+      out?.classList.remove("hidden");
+    }
+    function showIn() {
+      out?.classList.add("hidden");
+      inBox?.classList.remove("hidden");
+    }
+    function setError(msg) {
+      if (!errEl) return;
+      errEl.textContent = msg;
+      errEl.classList.remove("hidden");
+    }
+
+    try {
+      const [{ auth, googleProvider }, { onAuthStateChanged, signInWithPopup, signOut }, { loadCartFromFirestore, syncCartToFirestore }] =
+        await Promise.all([
+          import("../lib/firebase"),
+          import("firebase/auth"),
+          import("../lib/cart"),
+        ]);
+
+      btnGoogle?.addEventListener("click", async () => {
+        try {
+          await signInWithPopup(auth, googleProvider);
+        } catch (e) {
+          console.error(e);
+          setError("No se pudo iniciar sesión. Intenta nuevamente.");
+        }
+      });
+
+      btnLogout?.addEventListener("click", async () => {
+        try {
+          await signOut(auth);
+        } catch (e) {
+          console.error(e);
+          setError("No se pudo cerrar sesión. Intenta nuevamente.");
+        }
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        const params = new URLSearchParams(location.search);
+        const from = params.get("from");
+
+        if (user) {
+          nameEl.textContent = user.displayName ?? "Usuario";
+          emailEl.textContent = user.email ?? "";
+          photoEl.src = user.photoURL || "https://www.gravatar.com/avatar?d=mp&s=80";
+
+          // Sincroniza carrito
+          try {
+            await loadCartFromFirestore(user.uid);
+            await syncCartToFirestore(user.uid);
+          } catch (e) {
+            console.warn("Sync cart failed:", e);
+          }
+
+          if (from === "checkout" && goCheckout) {
+            goCheckout.href = "/checkout";
+          }
+          showIn();
+        } else {
+          showOut();
+        }
+      });
+    } catch (e) {
+      // Si falla cualquier import/config, mostramos el estado no logueado
+      console.error("Auth init error:", e);
+      setError("No se pudo inicializar la autenticación. Revisa la configuración de Firebase.");
+      showOut();
+    }
+  </script>
+</BaseLayout>

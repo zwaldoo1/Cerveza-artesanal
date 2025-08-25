@@ -1,0 +1,38 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+
+<BaseLayout title="Checkout — CervezaArtesana" description="Confirmación de compra">
+  <section class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Checkout</h1>
+
+    <div id="guard" class="rounded-lg border p-6 text-center">
+      Verificando sesión…
+    </div>
+
+    <div id="content" class="hidden space-y-4">
+      <p class="text-slate-600">
+        Aquí va tu proceso de pago (por ejemplo, redirección a Mercado Pago).
+      </p>
+      <a href="/carrito" class="underline text-brand hover:text-brand-dark">Volver al carrito</a>
+    </div>
+  </section>
+
+  <script type="module">
+    import { auth } from "../lib/firebase";
+    import { onAuthStateChanged } from "firebase/auth";
+
+    const guard = document.getElementById("guard");
+    const content = document.getElementById("content");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Si no hay sesión, vuelve a /cuenta para login
+        window.location.href = "/cuenta?from=checkout";
+      } else {
+        guard.classList.add("hidden");
+        content.classList.remove("hidden");
+      }
+    });
+  </script>
+</BaseLayout>

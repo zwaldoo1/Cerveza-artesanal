@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../../layout/BaseLayout.astro";
+import { products } from "../../lib/products"; // 👈 ajusta la ruta si tu archivo está en otro lugar
+
+// Genera todas las rutas /producto/<slug> en build estático
+export async function getStaticPaths() {
+  return products.map((p) => ({
+    params: { slug: p.slug },
+    props: { product: p },
+  }));
+}
+
+// Props inyectadas por getStaticPaths
+const { product } = Astro.props as {
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+    category: string;
+  };
+};
+---
+
+<BaseLayout title={`${product.name} — CervezaArtesana`} description={product.description}>
+  <article class="grid md:grid-cols-2 gap-8 items-start">
+    <img
+      src={product.image}
+      alt={product.name}
+      class="w-full h-auto rounded-lg border object-cover"
+      width="800"
+      height="600"
+      loading="lazy"
+    />
+
+    <div>
+      <h1 class="text-3xl font-extrabold">{product.name}</h1>
+      <p class="mt-2 text-slate-600">{product.description}</p>
+      <p class="mt-4 text-2xl font-bold">${product.price.toLocaleString("es-CL")}</p>
+
+      <div class="mt-6 flex gap-3">
+        <!-- Botón agregar al carrito (client-only, sin React) -->
+        <button
+          class="rounded-md border px-4 py-2 hover:bg-slate-50"
+          onclick={`(function(){
+            import('/src/lib/cart.ts').then(({ useCart }) => {
+              useCart.getState().add({
+                id: '${product.id}',
+                name: '${product.name.replace(/'/g, "\\'")}',
+                price: ${product.price},
+                image: '${product.image}',
+                qty: 1
+              }, 1);
+              alert('Agregado al carrito');
+            });
+          })()`}
+        >
+          Agregar al carrito
+        </button>
+
+        <a href="/carrito" class="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+          Ir al carrito
+        </a>
+      </div>
+
+      <div class="mt-8 text-sm text-slate-500">
+        <p><strong>Categoría:</strong> {product.category}</p>
+        <p class="mt-1">
+          <a class="underline text-brand hover:text-brand-dark" href="/catalogo">Volver al catálogo</a>
+        </p>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

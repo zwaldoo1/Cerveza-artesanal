@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+import ProductCard from "../components/ProductCard.astro"; // <- IMPORTA .astro explícitamente
+import { products } from "../lib/products";
+---
+
+<BaseLayout title="CervezaArtesana — Tienda de cervezas y artículos">
+  <section class="grid md:grid-cols-2 gap-8 items-center">
+    <div>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        Cervezas artesanales <span class="text-brand">frescas</span> y accesorios
+      </h1>
+      <p class="mt-4 text-lg opacity-90">
+        Descubre estilos IPA, Stout, Lager y más. Envíos rápidos y packs especiales.
+      </p>
+      <div class="mt-6 flex gap-3">
+        <a href="/catalogo" class="px-4 py-2 rounded-md bg-brand text-white hover:bg-brand-dark">Ver catálogo</a>
+        <a href="/contacto" class="px-4 py-2 rounded-md border border-slate-300 hover:bg-slate-50">Contacto</a>
+      </div>
+    </div>
+    <img src="/images/hero.jpg" alt="Copa de cerveza artesanal" class="rounded-lg shadow" />
+  </section>
+
+  <section id="destacados" class="mt-12">
+    <h2 class="text-2xl font-bold mb-4">Destacados</h2>
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {products.slice(0, 3).map((p) => <ProductCard product={p} />)}
+    </div>
+  </section>
+
+  <section id="contacto" class="mt-16">
+    <h2 class="text-2xl font-bold mb-4">Contacto</h2>
+    <p>¿Mayoristas? ¿Eventos? Escríbenos a
+      <a class="text-brand underline" href="mailto:ventas@cervezartesana.com"> ventas@cervezartesana.com</a>
+    </p>
+  </section>
+</BaseLayout>

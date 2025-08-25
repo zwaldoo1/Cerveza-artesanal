@@ -1,0 +1,107 @@
+---
+/**
+ * Sidebar de iconos (izquierda) — mejorado
+ * - Tooltips accesibles y discretos (CSS-only)
+ * - Estado activo más visible
+ * - Focus rings y tamaños cómodos para touch
+ * - Soporte dark mode con clases de Tailwind
+ * - Fácil de extender: agrega/quita items en el array
+ */
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string; // SVG path d=""
+};
+
+const items: NavItem[] = [
+  { href: "/",          label: "Inicio",    icon: "M3 12l9-9 9 9M5 10v10h14V10" },
+  { href: "/catalogo",  label: "Catálogo",  icon: "M4 6h16M4 12h16M4 18h16" },
+  { href: "/carrito",   label: "Carrito",   icon: "M3 3h2l.4 2M7 13h10l2-7H6.4M7 13L5.4 5M7 13a2 2 0 100 4 2 2 0 000-4m10 0a2 2 0 100 4 2 2 0 000-4" },
+  { href: "/favoritos", label: "Favoritos", icon: "M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364 4.318 12.682a4.5 4.5 0 010-6.364" },
+  { href: "/contacto",  label: "Contacto",  icon: "M4 4h16v12H5.17L4 17.17V4m8 5h.01" },
+];
+
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/"; // normaliza "/"
+const isActive = (href: string) =>
+  (href === "/" && pathname === "/") || (href !== "/" && pathname.startsWith(href));
+---
+
+<aside
+  class="fixed left-0 top-0 z-40 h-screen w-16 md:w-20 border-r border-slate-200 bg-white/80 backdrop-blur
+         supports-[backdrop-filter]:bg-white/60 dark:bg-slate-900/70 dark:border-slate-800 dark:text-slate-200">
+  <!-- Logo / marca -->
+  <div class="flex h-16 items-center justify-center border-b border-slate-200 dark:border-slate-800">
+    <a href="/" aria-label="Inicio"
+       class="rounded-xl p-2 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2
+              focus-visible:ring-brand/60 dark:hover:bg-slate-800">
+      <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="9" />
+      </svg>
+    </a>
+  </div>
+
+  <!-- Navegación -->
+  <nav aria-label="Navegación principal" class="mt-4 flex flex-col items-center gap-2">
+    {items.map((it) => {
+      const active = isActive(it.href);
+      return (
+        <a
+          href={it.href}
+          aria-label={it.label}
+          aria-current={active ? "page" : "false"}
+          class={[
+            "group relative flex h-11 w-11 items-center justify-center rounded-xl transition",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60",
+            active
+              ? "bg-brand text-white shadow-sm dark:bg-brand"
+              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+          ].join(" ")}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width={active ? 2.2 : 1.8}
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d={it.icon} />
+          </svg>
+
+          {/* Indicador lateral activo */}
+          {active && (
+            <span aria-hidden="true" class="absolute inset-y-2 -right-[6px] hidden w-[3px] rounded-full bg-brand-dark md:block" />
+          )}
+
+          {/* Tooltip (solo visual; label accesible ya está vía aria-label) */}
+          <span
+            class="pointer-events-none absolute left-14 z-10 hidden select-none rounded-md border border-slate-200 bg-white px-2 py-1 text-xs
+                   text-slate-700 shadow-sm opacity-0 transition group-hover:opacity-100 group-hover:md:block
+                   dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            role="tooltip"
+          >
+            {it.label}
+          </span>
+
+          <span class="sr-only">{it.label}</span>
+        </a>
+      );
+    })}
+  </nav>
+
+  <!-- Acción inferior (Cuenta) -->
+  <div class="absolute bottom-3 left-0 w-full flex items-center justify-center">
+    <a href="/cuenta" aria-label="Cuenta"
+       class="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition
+              hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60
+              dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 12a5 5 0 100-10 5 5 0 000 10z" />
+        <path d="M20 21a8 8 0 10-16 0" />
+      </svg>
+      <span class="sr-only">Cuenta</span>
+    </a>
+  </div>
+</aside>

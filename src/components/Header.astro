@@ -1,0 +1,14 @@
+---
+import CartDrawer from "./CartDrawer";
+---
+<header class="border-b border-slate-200/60 bg-white/70 backdrop-blur dark:bg-slate-900/50 sticky top-0 z-40">
+  <div class="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
+    <a href="/" class="font-semibold text-xl tracking-tight">Cerveza<span class="text-brand">Artesana</span></a>
+    <nav class="hidden md:flex gap-6">
+      <a href="/catalogo" class="hover:text-brand">Catálogo</a>
+      <a href="/#packs" class="hover:text-brand">Packs</a>
+      <a href="/#contacto" class="hover:text-brand">Contacto</a>
+    </nav>
+    <CartDrawer client:load />
+  </div>
+</header>

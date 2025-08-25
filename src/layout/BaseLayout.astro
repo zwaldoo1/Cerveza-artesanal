@@ -1,0 +1,28 @@
+---
+import "../styles/globals.css";
+import Footer from "../components/Footer.astro";
+import Sidebar from "../components/Sidebar.astro";
+
+const { title = "Tienda", description = "Tienda de cervezas artesanales" } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body class="min-h-screen bg-white text-slate-900">
+    <!-- Sidebar fijo -->
+    <Sidebar />
+
+    <!-- Contenido principal desplazado a la derecha del sidebar -->
+    <div class="pl-16 md:pl-20">
+      <main class="mx-auto max-w-5xl p-6">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>

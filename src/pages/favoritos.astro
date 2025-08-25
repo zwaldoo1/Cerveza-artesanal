@@ -1,0 +1,18 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+
+<BaseLayout title="Favoritos — CervezaArtesana" description="Tus productos guardados">
+  <h1 class="text-2xl font-bold mb-4">Favoritos</h1>
+
+  <!-- Estado vacío inicial -->
+  <div class="rounded-lg border p-6 text-center">
+    <p class="mb-4 text-slate-600">
+      Aún no tienes productos favoritos guardados.
+    </p>
+    <a href="/catalogo"
+       class="inline-block rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+      Ver catálogo
+    </a>
+  </div>
+</BaseLayout>

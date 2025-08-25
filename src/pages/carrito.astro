@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+
+<BaseLayout title="Carrito — CervezaArtesana" description="Tu carrito de compras">
+  <section class="flex items-start justify-between gap-8">
+    <!-- Lista de ítems del carrito -->
+    <div class="flex-1">
+      <h1 class="text-2xl font-bold mb-4">Carrito</h1>
+
+      <!-- Estado vacío (reemplaza por tu lógica real cuando tengas cart) -->
+      <div class="rounded-lg border p-6 text-center">
+        <p class="mb-4 text-slate-600">Tu carrito está vacío.</p>
+        <a href="/catalogo" class="inline-block rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+          Ir al catálogo
+        </a>
+      </div>
+    </div>
+
+    <!-- Resumen -->
+    <aside class="w-full max-w-sm rounded-lg border p-4 sticky top-6 self-start">
+      <h2 class="mb-3 font-semibold">Resumen</h2>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span>Subtotal</span><span>$0</span></div>
+        <div class="flex justify-between"><span>Envío</span><span>A calcular</span></div>
+        <div class="flex justify-between font-semibold border-t pt-2"><span>Total</span><span>$0</span></div>
+      </div>
+      <button disabled
+        class="mt-4 w-full rounded-md bg-slate-300 px-4 py-2 font-medium text-slate-600 cursor-not-allowed">
+        Proceder al pago
+      </button>
+      <p class="mt-2 text-xs text-slate-500">Agrega productos para habilitar el pago.</p>
+    </aside>
+  </section>
+</BaseLayout>

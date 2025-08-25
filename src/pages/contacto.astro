@@ -1,0 +1,69 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+// Cambia este correo por el tuyo real:
+const EMAIL = "ventas@cervezartesana.com";
+---
+
+<BaseLayout title="Contacto — CervezaArtesana" description="Escríbenos para compras mayoristas o eventos">
+  <h1 class="text-2xl font-bold mb-2">Contacto</h1>
+  <p class="text-slate-600 mb-8">
+    ¿Mayoristas? ¿Eventos? Escríbenos y te respondemos a la brevedad.
+  </p>
+
+  <div class="grid md:grid-cols-2 gap-8">
+    <!-- Formulario -->
+    <form
+      class="rounded-lg border p-6 space-y-4"
+      method="POST"
+      action={`mailto:${EMAIL}`}
+      enctype="text/plain"
+    >
+      <div>
+        <label for="nombre" class="block text-sm font-medium">Nombre</label>
+        <input id="nombre" name="Nombre" type="text" required
+               class="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-brand/60" />
+      </div>
+
+      <div>
+        <label for="correo" class="block text-sm font-medium">Correo</label>
+        <input id="correo" name="Correo" type="email" required
+               class="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-brand/60" />
+      </div>
+
+      <div>
+        <label for="asunto" class="block text-sm font-medium">Asunto</label>
+        <input id="asunto" name="Asunto" type="text" required
+               class="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-brand/60" />
+      </div>
+
+      <div>
+        <label for="mensaje" class="block text-sm font-medium">Mensaje</label>
+        <textarea id="mensaje" name="Mensaje" rows={5} required
+                  class="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-brand/60"></textarea>
+      </div>
+
+      <button type="submit" class="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
+        Enviar
+      </button>
+
+      <p class="text-xs text-slate-500">
+        También puedes escribirnos a
+        <a class="underline text-brand hover:text-brand-dark" href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+      </p>
+    </form>
+
+    <!-- Información -->
+    <div class="rounded-lg border p-6 space-y-4">
+      <h2 class="font-semibold">Información</h2>
+      <ul class="space-y-1 text-slate-700">
+        <li><strong>Correo:</strong> <a class="underline text-brand hover:text-brand-dark" href={`mailto:${EMAIL}`}>{EMAIL}</a></li>
+        <li><strong>Horario:</strong> Lun–Vie, 10:00–18:00</li>
+        <li><strong>Ubicación:</strong> Envíos a todo el país</li>
+      </ul>
+
+      <div class="rounded-md bg-slate-50 p-4 text-sm text-slate-600">
+        ¿Consultas mayoristas o eventos? Cuéntanos cantidades estimadas, fechas y despacho.
+      </div>
+    </div>
+  </div>
+</BaseLayout>

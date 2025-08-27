@@ -7,7 +7,7 @@ export default {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#b45309",   // amber-700
+          DEFAULT: "#b45308",   // amber-700
           dark: "#92400e",      // amber-800
         },
       },

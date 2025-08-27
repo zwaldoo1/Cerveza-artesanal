@@ -1,7 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer utilities {
+  /* Fondo ámbar suave para toda la web */
+  .beer-amber-bg {
+    background-image:
+      radial-gradient(80rem 40rem at 10% 0%, rgba(251, 191, 36, 0.14) 0%, transparent 60%),
+      radial-gradient(60rem 30rem at 100% 10%, rgba(245, 158, 11, 0.10) 0%, transparent 60%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 80rem 40rem, 60rem 30rem;
+    background-position: 10% 0%, 100% 10%;
+    background-attachment: fixed, fixed; /* efecto sutil al hacer scroll */
+  }
+}
 
-:root {
-  color-scheme: light dark;
+
+/* Estilos base (opcional) */
+@layer base {
+  html, body {
+    @apply bg-white text-slate-800;
+  }
+}
+
+/* Utilidades propias (opcional) */
+@layer utilities {
+  .text-brand { @apply text-amber-700; }       /* o tu color de marca */
+  .bg-brand { @apply bg-amber-700; }
+  .hover\:bg-brand-dark:hover { @apply bg-amber-800; }
 }

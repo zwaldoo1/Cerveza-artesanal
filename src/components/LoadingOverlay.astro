@@ -1,0 +1,185 @@
+---
+// File: src/components/LoadingOverlay.astro
+
+interface Props {
+  message?: string;
+  bg?: string;                // color base del overlay (se mezcla con alpha)
+  minVisibilityMs?: number;
+  fallbackMs?: number;
+  autoEvent?: 'load' | 'domcontentloaded' | 'immediate' | 'none';
+  blockScroll?: boolean;
+  zIndex?: number;
+  blurPx?: number;            // blur aplicado al contenido mientras carga
+  dim?: number;               // 0–1: oscurecimiento del contenido (brightness)
+  overlayAlpha?: number;      // 0–1: transparencia del overlay
+}
+
+const {
+  message = 'Cargando…',
+  bg = '#0b0b0f',
+  minVisibilityMs = 300,
+  fallbackMs = 3000,
+  autoEvent = 'load',
+  blockScroll = true,
+  zIndex = 9999,
+  blurPx = 6,
+  dim = 0.85,
+  overlayAlpha = 0.55,
+} = Astro.props as Props;
+---
+
+<style>
+  /* Overlay con transparencia y desenfoque del fondo */
+  .loader-overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: color-mix(in oklab, var(--loader-bg, #0b0b0f) var(--overlay-alpha, 55%), transparent);
+    z-index: var(--loader-z, 9999);
+    opacity: 1;
+    transition: opacity 260ms ease, background 260ms ease, backdrop-filter 260ms ease;
+    backdrop-filter: blur(8px) saturate(110%);
+  }
+  .loader-overlay[aria-hidden="true"] {
+    opacity: 0;
+    background: color-mix(in oklab, var(--loader-bg, #0b0b0f) 0%, transparent);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+
+  /* Tarjeta central */
+  .card {
+    display: grid;
+    gap: .75rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 1rem;
+    background: color-mix(in oklab, white 6%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    color: white;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25);
+    border-top-color: white;
+    animation: spin 900ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Accesibilidad */
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+    .loader-overlay { transition: opacity 160ms ease; }
+  }
+
+  /* 🔥 Efecto de transparencia/blur sobre TODO el contenido mientras carga
+     Se aplica a todos los hijos directos del body excepto el overlay. */
+  :global(html.loading) body > *:not(#app-loader) {
+    filter: var(--loading-filter, blur(6px)) brightness(0.85);
+    transition: filter 260ms ease;
+  }
+  :global(html:not(.loading)) body > *:not(#app-loader) {
+    filter: none;
+  }
+</style>
+
+<div
+  id="app-loader"
+  class="loader-overlay"
+  role="status"
+  aria-live="polite"
+  aria-label="Cargando contenido"
+  style={`--loader-bg: ${bg}; --loader-z: ${zIndex}; --overlay-alpha: ${Math.round(overlayAlpha*100)}%`}
+  data-min={String(minVisibilityMs)}
+  data-fallback={String(fallbackMs)}
+  data-auto={autoEvent}
+  data-block-scroll={String(blockScroll)}
+  data-blur={String(blurPx)}
+  data-dim={String(dim)}
+>
+  <div class="card">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>{message}</span>
+    <slot />
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('app-loader');
+  if (!overlay) { console.warn('[LoadingOverlay] No overlay element found.'); }
+
+  const getBool = (v) => v === 'true';
+  const MIN   = Number(overlay?.dataset.min || 0);
+  const FALL  = Number(overlay?.dataset.fallback || 0);
+  const AUTO  = overlay?.dataset.auto || 'load';
+  const BLOCK = getBool(overlay?.dataset.blockScroll || 'true');
+  const BLUR  = Number(overlay?.dataset.blur || 6);
+  const DIM   = Number(overlay?.dataset.dim || 0.85);
+
+  const html = document.documentElement;
+  const prevOverflow = html.style.overflow;
+
+  // Aplica clase "loading" para activar filtro global (blur + dim)
+  html.classList.add('loading');
+  // Define el filtro exacto según props
+  const filter = `blur(${BLUR}px) brightness(${DIM})`;
+  document.documentElement.style.setProperty('--loading-filter', filter);
+
+  if (BLOCK && overlay) {
+    html.style.overflow = 'hidden';
+    html.setAttribute('aria-busy', 'true');
+  }
+
+  const shownAt = performance.now();
+
+  const cleanup = () => {
+    html.classList.remove('loading');
+    document.documentElement.style.removeProperty('--loading-filter');
+    if (BLOCK) {
+      html.style.overflow = prevOverflow;
+      html.removeAttribute('aria-busy');
+    }
+  };
+
+  const actuallyHide = () => {
+    if (!overlay || overlay.getAttribute('aria-hidden') === 'true') return;
+    overlay.setAttribute('aria-hidden', 'true');
+    const done = () => { overlay.remove(); cleanup(); };
+    overlay.addEventListener('transitionend', done, { once: true });
+    setTimeout(done, 520); // respaldo
+  };
+
+  const hideRespectingMin = () => {
+    const elapsed = performance.now() - shownAt;
+    const delay = Math.max(0, MIN - elapsed);
+    setTimeout(actuallyHide, delay);
+  };
+
+  // Estrategias de auto-ocultado
+  switch (AUTO) {
+    case 'immediate':
+      hideRespectingMin();
+      break;
+    case 'domcontentloaded':
+      if (document.readyState === 'interactive' || document.readyState === 'complete') hideRespectingMin();
+      else window.addEventListener('DOMContentLoaded', hideRespectingMin, { once: true });
+      break;
+    case 'load':
+      if (document.readyState === 'complete') hideRespectingMin();
+      else window.addEventListener('load', hideRespectingMin, { once: true });
+      break;
+    case 'none':
+    default:
+      // Control manual con window.__hideAppLoader()
+      break;
+  }
+
+  // Fallback por si el evento no dispara
+  if (FALL > 0) setTimeout(hideRespectingMin, FALL);
+
+  // API pública para ocultar manualmente
+  window.__hideAppLoader = hideRespectingMin;
+</script>

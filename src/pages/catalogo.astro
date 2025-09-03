@@ -38,9 +38,9 @@ import { products } from "../lib/products";
     ))}
   </div>
 
-  <!-- Carga el cliente de carrito una vez y adjunta listeners -->
+  <!-- Import ESTÁTICO con extensión .ts para que Vite lo resuelva -->
   <script type="module">
-    import { addToCart } from "../lib/cart-client"; // 👈 sin .ts
+    import { addToCart } from "../lib/cart-client.ts";
 
     function wireButtons() {
       const buttons = document.querySelectorAll(".btn-add");
@@ -52,21 +52,16 @@ import { products } from "../lib/products";
             price: Number(btn.getAttribute("data-price")),
             image: btn.getAttribute("data-image") || undefined,
           };
-          try {
-            addToCart(item, 1);
-            const prev = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = "Agregado ✓";
-            setTimeout(() => { btn.disabled = false; btn.textContent = prev; }, 1200);
-          } catch (e) {
-            console.error("addToCart error:", e);
-            alert("No se pudo agregar. Revisa la consola.");
-          }
+          addToCart(item, 1);
+
+          const prev = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = "Agregado ✓";
+          setTimeout(() => { btn.disabled = false; btn.textContent = prev; }, 1200);
         });
       });
     }
 
-    // Por si el script carga antes del DOM (raro), garantizamos inicio
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", wireButtons, { once: true });
     } else {

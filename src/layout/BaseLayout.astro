@@ -2,6 +2,7 @@
 import "../styles/globals.css";
 import Footer from "../components/Footer.astro";
 import Sidebar from "../components/Sidebar.astro";
+import LoadingOverlay from "@/components/LoadingOverlay.astro";
 
 const { title = "Tienda", description = "Tienda de cervezas artesanales" } = Astro.props;
 ---
@@ -12,19 +13,140 @@ const { title = "Tienda", description = "Tienda de cervezas artesanales" } = Ast
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+
+    <!-- ====== ESTILO GLOBAL DEL LAYOUT (fondo + detalles UI) ====== -->
+    <style>
+      /* Asegura que el documento pueda desplazarse */
+      html, body { height: auto; overflow-y: auto; }
+
+      :root {
+        /* Paleta base (oscuro) */
+        --bg-base: #0b0b0f;
+        --mesh-a: 42 95% 58%;   /* ámbar */
+        --mesh-b: 18 90% 60%;   /* naranja */
+        --mesh-c: 268 70% 62%;  /* violeta */
+        --mesh-d: 200 80% 58%;  /* turquesa */
+        --grain: rgba(255,255,255,0.03);
+
+        --card-bg: color-mix(in oklab, white 6%, transparent);
+        --card-border: rgba(255,255,255,0.08);
+        --ring: #f59e0b; /* ámbar para focus */
+        --selection: rgba(245, 158, 11, 0.22);
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg-base: #faf8f2;
+          --grain: rgba(0,0,0,0.035);
+          --card-bg: rgba(255,255,255,.7);
+          --card-border: rgba(0,0,0,.06);
+          --ring: #7c3aed;
+          --selection: rgba(124, 58, 237, 0.18);
+        }
+      }
+
+      /* Fondo mesh + aurora animado (sin imágenes) */
+      .app-bg {
+        position: relative;
+        min-height: 100svh;
+        background:
+          radial-gradient(40% 50% at 15% 20%, hsl(var(--mesh-a)/0.25), transparent 60%),
+          radial-gradient(35% 45% at 85% 25%, hsl(var(--mesh-d)/0.18), transparent 65%),
+          radial-gradient(45% 50% at 70% 75%, hsl(var(--mesh-b)/0.16), transparent 60%),
+          radial-gradient(35% 40% at 25% 80%, hsl(var(--mesh-c)/0.14), transparent 60%),
+          var(--bg-base);
+        background-attachment: fixed;
+        /* ❌ Antes: overflow: clip; (ocultaba la barra)
+           ✅ Ahora permitimos scroll vertical y evitamos desbordes horizontales */
+        overflow-x: clip;
+        overflow-y: visible;
+        animation: bg-drift 18s ease-in-out infinite alternate;
+      }
+      @keyframes bg-drift {
+        0%   { background-position:   0%   0%, 100%  0%, 100% 100%,   0% 100%; }
+        100% { background-position: 2.5% -2%,  98%  2%,  98%  98%, 2.5% 102%; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .app-bg { animation: none; }
+      }
+
+      /* Capa grain sutil (no bloquea scroll) */
+      .app-bg::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          repeating-linear-gradient(0deg, var(--grain) 0 2px, transparent 2px 4px),
+          repeating-linear-gradient(90deg, var(--grain) 0 2px, transparent 2px 4px);
+        mix-blend-mode: overlay;
+        opacity: .38;
+      }
+
+      /* Contenedor “shell” para no heredar efectos del fondo */
+      .app-shell {
+        position: relative;
+        isolation: isolate;
+      }
+
+      /* Tarjeta principal del contenido */
+      .app-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 1.25rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,.28);
+        backdrop-filter: blur(10px) saturate(110%);
+      }
+
+      /* Tipografía y mejoras de legibilidad */
+      ::selection { background: var(--selection); }
+      :focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+      }
+
+      /* Scrollbar sutil (Chromium/Safari) */
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.12);
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-track { background: transparent; }
+    </style>
   </head>
 
-  <!-- Aplicamos el fondo directamente al body -->
-  <body class="min-h-screen text-slate-900 beer-amber-bg">
-    <!-- Sidebar fijo -->
-    <Sidebar />
+  <body class="app-bg text-slate-100">
+    <!-- Loading Overlay -->
+    <LoadingOverlay
+      message="Cargando la experiencia…"
+      submessage="Preparando la tienda"
+      bg="transparent"
+      accent="#f59e0b"
+      minVisibilityMs={500}
+      fallbackMs={4000}
+      autoEvent="load"
+      blockScroll={false}   /* no bloquea scroll */
+      zIndex={9999}
+      showProgress={true}
+      simulateProgress={true}
+    />
 
-    <!-- Contenido principal desplazado a la derecha del sidebar -->
-    <div class="pl-16 md:pl-20">
-      <main class="mx-auto max-w-5xl p-6">
-        <slot />
-      </main>
-      <Footer />
+    <div class="app-shell">
+      <!-- Sidebar fijo -->
+      <Sidebar />
+
+      <!-- Contenido principal con tarjeta glass y mejor layout -->
+      <div class="pl-16 md:pl-20">
+        <main class="mx-auto max-w-6xl p-4 sm:p-6 md:p-8">
+          <section class="app-card p-5 sm:p-7 md:p-10">
+            <slot />
+          </section>
+          <footer class="mt-6 sm:mt-8">
+            <Footer />
+          </footer>
+        </main>
+      </div>
     </div>
   </body>
 </html>

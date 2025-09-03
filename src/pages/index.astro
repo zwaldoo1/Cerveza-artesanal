@@ -5,33 +5,182 @@ import { products } from "../lib/products";
 ---
 
 <BaseLayout title="CervezaArtesana — Tienda de cervezas y artículos">
-  <section class="grid md:grid-cols-2 gap-8 items-center">
-    <div>
-      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
-        Cervezas artesanales <span class="text-brand">frescas</span> y accesorios
-      </h1>
-      <p class="mt-4 text-lg opacity-90">
-        Descubre estilos IPA, Stout, Lager y más. Envíos rápidos y packs especiales.
-      </p>
-      <div class="mt-6 flex gap-3">
-        <a href="/catalogo" class="px-4 py-2 rounded-md bg-brand text-white hover:bg-brand-dark">Ver catálogo</a>
-        <a href="/contacto" class="px-4 py-2 rounded-md border border-slate-300 hover:bg-slate-50">Contacto</a>
+  <!-- HERO AURORA -->
+  <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 px-6 py-12 sm:px-10 sm:py-16 md:py-20">
+    <!-- Fondo aurora + grain (decorativo) -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute inset-0 opacity-90"
+        style="background:
+          radial-gradient(45% 60% at 12% 20%, rgba(245,158,11,.25), transparent 60%),
+          radial-gradient(45% 60% at 88% 25%, rgba(56,189,248,.18), transparent 62%),
+          radial-gradient(55% 65% at 72% 80%, rgba(124,58,237,.16), transparent 60%),
+          #0b0b0f;">
+      </div>
+      <div class="absolute inset-0 mix-blend-overlay opacity-40"
+        style="background-image:
+          repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 2px, transparent 2px 4px),
+          repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 2px, transparent 2px 4px);">
       </div>
     </div>
-    <img src="/images/hero.jpg" alt="Copa de cerveza artesanal" class="rounded-lg shadow" />
+
+    <div class="mx-auto grid max-w-7xl items-center gap-10 md:grid-cols-2">
+      <div>
+        <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/90 backdrop-blur">
+          <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-400"></span>
+          recién elaboradas • envíos 24-48h
+        </span>
+
+        <h1 class="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+          Cervezas artesanales
+          <span class="bg-gradient-to-r from-amber-400 via-fuchsia-400 to-sky-400 bg-clip-text text-transparent">
+            frescas
+          </span>
+          y accesorios
+        </h1>
+
+        <p class="mt-4 text-lg text-white/85">
+          IPA, Stout, Lager y más. Packs especiales, ediciones limitadas y cristalería premium.
+        </p>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="/catalogo"
+             class="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-white shadow hover:bg-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60">
+            Ver catálogo
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="/contacto"
+             class="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-white/90 backdrop-blur hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60">
+            Contacto
+          </a>
+        </div>
+
+        <!-- Trust badges -->
+        <ul class="mt-6 flex flex-wrap items-center gap-4 text-sm text-white/70">
+          <li class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Pago seguro</li>
+          <li class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-sky-400"></span> Envíos 24-48h</li>
+          <li class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-fuchsia-400"></span> Devolución 7 días</li>
+        </ul>
+      </div>
+
+      <div class="relative">
+        <img src="/images/hero.jpg" alt="Copa de cerveza artesanal" class="relative z-10 rounded-xl shadow-2xl" />
+        <!-- Glow detrás de la imagen -->
+        <div aria-hidden="true" class="absolute -inset-6 -z-0 rounded-2xl bg-gradient-to-tr from-amber-400/25 via-fuchsia-400/20 to-sky-400/25 blur-2xl"></div>
+      </div>
+    </div>
+
+    <!-- CTA flotante móvil -->
+    <a href="/catalogo"
+       class="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-white shadow-lg ring-1 ring-amber-300/40 backdrop-blur transition hover:translate-y-[-1px] md:hidden">
+      Comprar ahora
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M13 5l7 7-7 7"/>
+      </svg>
+    </a>
   </section>
 
-  <section id="destacados" class="mt-12">
-    <h2 class="text-2xl font-bold mb-4">Destacados</h2>
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {products.slice(0, 3).map((p) => <ProductCard product={p} />)}
+  <!-- CATEGORÍAS / CHIPS -->
+  <section class="mx-auto mt-8 max-w-7xl">
+    <div class="flex flex-wrap items-center gap-2">
+      {["IPA", "Stout", "Lager", "Amber", "Sin filtrar", "Edición limitada"].map((c) => (
+        <a href={`/catalogo?cat=${encodeURIComponent(c)}`}
+           class="chip hover:scale-[1.02]">
+          {c}
+        </a>
+      ))}
     </div>
   </section>
 
-  <section id="contacto" class="mt-16">
-    <h2 class="text-2xl font-bold mb-4">Contacto</h2>
-    <p>¿Mayoristas? ¿Eventos? Escríbenos a
-      <a class="text-brand underline" href="mailto:ventas@cervezartesana.com"> ventas@cervezartesana.com</a>
-    </p>
+  <!-- DESTACADOS -->
+  <section id="destacados" class="mx-auto mt-10 max-w-7xl">
+    <div class="mb-4 flex items-end justify-between">
+      <h2 class="text-2xl font-bold">Destacados</h2>
+      <a href="/catalogo" class="text-sm text-white/70 underline decoration-dotted underline-offset-4 hover:text-white">
+        Ver todo
+      </a>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {products.slice(0, 3).map((p) => (
+        <div class="card-hover">
+          <ProductCard product={p} />
+        </div>
+      ))}
+    </div>
   </section>
+
+  <!-- BANNER / PACK -->
+  <section class="mx-auto mt-12 max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-amber-500/15 via-fuchsia-500/10 to-sky-500/15 p-1">
+    <div class="flex flex-col items-start justify-between gap-6 rounded-[1rem] bg-black/30 p-6 backdrop-blur md:flex-row md:items-center">
+      <div>
+        <h3 class="text-xl font-semibold">Pack Degustación • 6 estilos</h3>
+        <p class="mt-1 text-white/80">Ideal para descubrir tu favorito. Incluye vaso teku de regalo.</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/catalogo?pack=degustacion" class="rounded-lg bg-amber-500 px-4 py-2 text-white shadow hover:bg-amber-600">
+          Quiero mi pack
+        </a>
+        <a href="/catalogo" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white/90 backdrop-blur hover:bg-white/15">
+          Ver más packs
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO / NEWSLETTER -->
+  <section id="contacto" class="mx-auto mt-14 max-w-7xl">
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+        <h3 class="text-xl font-semibold">Contacto</h3>
+        <p class="mt-1 text-white/80">
+          ¿Mayoristas? ¿Eventos? Escríbenos y coordinamos.
+        </p>
+        <a class="mt-4 inline-flex items-center gap-2 text-amber-300 underline decoration-dotted underline-offset-4 hover:text-amber-200"
+           href="mailto:ventas@cervezartesana.com">
+          ventas@cervezartesana.com
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M13 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <form class="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+        <h3 class="text-xl font-semibold">Suscríbete</h3>
+        <p class="mt-1 text-white/80">Promos, lanzamientos y eventos (1–2 al mes).</p>
+        <div class="mt-4 flex gap-2">
+          <input type="email" required placeholder="tu@correo.com"
+                 class="w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+          <button type="submit"
+                  class="rounded-lg bg-amber-500 px-4 py-2 text-white shadow hover:bg-amber-600">
+            Unirme
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <style is:global>
+    /* Chips categorías */
+    .chip {
+      @apply inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm text-white/85 backdrop-blur transition;
+    }
+    /* Efecto hover para ProductCard contenedor */
+    .card-hover {
+      position: relative;
+      transition: transform .18s ease;
+    }
+    .card-hover:hover { transform: translateY(-2px); }
+    .card-hover::after {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: 1rem;
+      background: linear-gradient(90deg, rgba(245,158,11,.25), rgba(124,58,237,.22), rgba(56,189,248,.25));
+      opacity: 0; filter: blur(10px);
+      transition: opacity .25s ease, filter .25s ease;
+      pointer-events: none;
+    }
+    .card-hover:hover::after { opacity: .7; filter: blur(14px); }
+  </style>
 </BaseLayout>

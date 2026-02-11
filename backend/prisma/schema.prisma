@@ -7,13 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
   price       Int
-  stock       Int      @default(0)
+  stock       Int       @default(0)
   imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  // ✅ relación inversa para OrderItem.product
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+}
+
+model Order {
+  id            Int     @id @default(autoincrement())
+  customerName  String?
+  customerEmail String?
+  status        String  @default("PENDING")
+  total         Int     @default(0)
+
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        Int @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  qty       Int
+  unitPrice Int
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 }

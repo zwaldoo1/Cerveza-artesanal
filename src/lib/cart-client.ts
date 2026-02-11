@@ -1,4 +1,6 @@
+"use client";
 import { useCart } from "../lib/cart";
+
 
 export type AddItem = { id: string; name: string; price: number; image?: string };
 

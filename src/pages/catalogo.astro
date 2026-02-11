@@ -8,7 +8,7 @@ import { products } from "../lib/products";
 
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {products.map((p) => (
-      <article class="rounded-lg border border-slate-200/70 overflow-hidden bg-white">
+      <article class="rounded-lg border border-slate-200/70 overflow-hidden bg-black">
         <a href={`/producto/${p.slug}`} class="block">
           <img src={p.image} alt={p.name} class="aspect-square object-cover" loading="lazy" />
         </a>

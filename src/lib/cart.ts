@@ -1,3 +1,4 @@
+"use client";
 import { create } from "zustand";
 
 export type CartItem = { id: string; name: string; price: number; qty: number; image?: string };

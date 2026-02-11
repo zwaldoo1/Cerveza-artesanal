@@ -5,12 +5,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID",
+  apiKey: "AIzaSyA6gnaX1PY6lF3d9ci6FUlEEmoJYORsspc",
+  authDomain: "cervezas-eric.firebaseapp.com",
+  projectId: "cervezas-eric",
+  storageBucket: "cervezas-eric.firebasestorage.app",
+  messagingSenderId: "710219392070",
+  appId: "1:710219392070:web:98791034c39c5a57d21647",
+  measurementId: "G-S502CZ5EWK"
 };
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);

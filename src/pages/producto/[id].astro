@@ -1,0 +1,135 @@
+---
+import BaseLayout from "../../layout/BaseLayout.astro";
+
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+const { id } = Astro.params;
+
+// Fetch producto desde backend
+const res = await fetch(`${API_BASE}/api/products/${id}`);
+
+if (!res.ok) {
+  throw new Error("Producto no encontrado");
+}
+
+const product = await res.json();
+
+const imgSrc = product.imageUrl
+  ? (String(product.imageUrl).startsWith("http")
+      ? product.imageUrl
+      : `${API_BASE}${product.imageUrl}`)
+  : "/images/placeholder.png";
+
+const stock = Number(product.stock ?? 0);
+const price = Number(product.price ?? 0);
+const category = product.category?.name ?? null;
+---
+
+<BaseLayout
+  title={`${product.name} — CervezaArtesana`}
+  description={product.description ?? ""}
+>
+
+  <article class="grid md:grid-cols-2 gap-10 items-start">
+
+    <!-- IMAGEN -->
+    <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur">
+      <img
+        src={imgSrc}
+        alt={product.name}
+        class="w-full aspect-square object-cover"
+        loading="lazy"
+      />
+    </div>
+
+    <!-- INFO -->
+    <div class="space-y-5">
+
+      {category && (
+        <span class="inline-block rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-slate-100">
+          {category}
+        </span>
+      )}
+
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+        {product.name}
+      </h1>
+
+      <p class="text-slate-300">
+        {product.description ?? ""}
+      </p>
+
+      <div class="flex items-center gap-4">
+        <div class="text-3xl font-extrabold text-amber-300">
+          ${price.toLocaleString("es-CL")}
+        </div>
+
+        <span class={`text-sm ${stock > 0 ? "text-slate-300/70" : "text-red-300"}`}>
+          {stock > 0 ? `Stock disponible: ${stock}` : "Producto agotado"}
+        </span>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="flex gap-3 pt-4">
+
+        <button
+          id="addBtn"
+          class={`rounded-xl px-5 py-3 font-bold transition ${
+            stock > 0
+              ? "bg-amber-400 text-zinc-900 hover:bg-amber-300"
+              : "bg-white/10 text-slate-400 cursor-not-allowed opacity-60"
+          }`}
+          disabled={stock <= 0}
+          data-id={product.id}
+          data-name={product.name}
+          data-price={price}
+          data-image={imgSrc}
+        >
+          {stock > 0 ? "Agregar al carrito" : "Sin stock"}
+        </button>
+
+        <a
+          href="/carrito"
+          class="rounded-xl border border-white/10 px-5 py-3 font-semibold text-slate-100 hover:bg-white/10 transition"
+        >
+          Ir al carrito
+        </a>
+      </div>
+
+      <div class="pt-6 text-sm text-slate-400">
+        <a class="underline hover:text-amber-300" href="/catalogo">
+          ← Volver al catálogo
+        </a>
+      </div>
+
+    </div>
+  </article>
+
+  <script type="module">
+    import { addToCart } from "../../lib/cart-client.ts";
+
+    const btn = document.getElementById("addBtn");
+
+    if (btn && !btn.disabled) {
+      btn.addEventListener("click", () => {
+        const item = {
+          id: btn.getAttribute("data-id"),
+          name: btn.getAttribute("data-name"),
+          price: Number(btn.getAttribute("data-price")),
+          image: btn.getAttribute("data-image") || undefined,
+        };
+
+        addToCart(item, 1);
+
+        const prev = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Agregado ✓";
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = prev;
+        }, 1200);
+      });
+    }
+  </script>
+
+</BaseLayout>

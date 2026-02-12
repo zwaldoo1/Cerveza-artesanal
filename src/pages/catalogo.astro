@@ -1,44 +1,122 @@
 ---
 import BaseLayout from "../layout/BaseLayout.astro";
-import { products } from "../lib/products";
+import { fetchProducts } from "../lib/products-api";
+
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+const products = await fetchProducts();
+
+function resolveImg(p: any) {
+  const url = p.imageUrl ?? null; // ✅ solo DB
+  if (!url) return "/images/placeholder.png";
+  return String(url).startsWith("http") ? url : `${API_BASE}${url}`;
+}
 ---
 
 <BaseLayout title="Catálogo — CervezaArtesana">
-  <h1 class="text-3xl font-bold mb-6">Catálogo</h1>
+  <!-- HERO -->
+  <section class="mb-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+        Catálogo <span class="text-amber-300">Cerveza Artesana</span>
+      </h1>
+      <p class="text-slate-300 max-w-2xl">
+        Productos reales desde MySQL. Agrega al carrito y arma tu pack.
+      </p>
+      <p class="text-xs text-slate-400">
+        API: <span class="font-mono">{API_BASE}</span>
+      </p>
+    </div>
+  </section>
 
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {products.map((p) => (
-      <article class="rounded-lg border border-slate-200/70 overflow-hidden bg-black">
-        <a href={`/producto/${p.slug}`} class="block">
-          <img src={p.image} alt={p.name} class="aspect-square object-cover" loading="lazy" />
+  {products.length === 0 ? (
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-200">
+      <p class="font-semibold">No hay productos aún.</p>
+      <p class="text-slate-300 mt-1">
+        Cárgalos desde el panel admin:
+        <a
+          class="underline text-amber-300 ml-1"
+          href={`${API_BASE}/admin`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {API_BASE}/admin
         </a>
+      </p>
+    </div>
+  ) : (
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {products.map((p: any) => {
+        const imgSrc = resolveImg(p);
+        const stock = Number(p.stock ?? 0);
+        const price = Number(p.price ?? 0);
+        const cat = p.category?.name ?? null;
 
-        <div class="p-4">
-          <h3 class="font-semibold text-lg">{p.name}</h3>
-          <p class="text-sm opacity-80 line-clamp-2">{p.description}</p>
-          <div class="mt-2 font-semibold">${p.price.toLocaleString("es-CL")}</div>
-
-          <div class="mt-4 flex gap-2">
-            <button
-              class="btn-add flex-1 rounded-md bg-brand px-3 py-2 text-white font-medium hover:bg-brand-dark transition"
-              data-id={p.id}
-              data-name={p.name}
-              data-price={p.price}
-              data-image={p.image}
-            >
-              Agregar al carrito
-            </button>
-
-            <a href={`/producto/${p.slug}`} class="rounded-md border px-3 py-2 font-medium hover:bg-slate-50">
-              Ver
+        return (
+          <article class="group rounded-2xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur hover:bg-white/10 transition">
+            <a href={`/producto/${p.id}`} class="block">
+              <img
+                src={imgSrc}
+                alt={p.name}
+                class="aspect-square w-full object-cover group-hover:scale-[1.02] transition"
+                loading="lazy"
+              />
             </a>
-          </div>
-        </div>
-      </article>
-    ))}
-  </div>
 
-  <!-- Import ESTÁTICO con extensión .ts para que Vite lo resuelva -->
+            <div class="p-4">
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="font-semibold text-lg leading-tight">{p.name}</h3>
+
+                {cat && (
+                  <span class="shrink-0 rounded-full border border-white/10 bg-white/10 px-2 py-1 text-xs text-slate-100">
+                    {cat}
+                  </span>
+                )}
+              </div>
+
+              <p class="mt-1 text-sm text-slate-300/90 line-clamp-2">
+                {p.description ?? ""}
+              </p>
+
+              <div class="mt-3 flex items-center justify-between">
+                <div class="text-lg font-extrabold">
+                  ${price.toLocaleString("es-CL")}
+                </div>
+
+                <span class={`text-xs ${stock > 0 ? "text-slate-300/70" : "text-red-300/90"}`}>
+                  {stock > 0 ? `Stock: ${stock}` : "Sin stock"}
+                </span>
+              </div>
+
+              <div class="mt-4 flex gap-2">
+                <button
+                  class={`btn-add flex-1 rounded-xl px-3 py-2 font-bold transition ${
+                    stock > 0
+                      ? "bg-amber-400/90 text-zinc-900 hover:bg-amber-300"
+                      : "bg-white/10 text-slate-300 cursor-not-allowed opacity-60"
+                  }`}
+                  data-id={p.id}
+                  data-name={p.name}
+                  data-price={price}
+                  data-image={imgSrc}
+                  disabled={stock <= 0}
+                >
+                  {stock > 0 ? "Agregar" : "Agotado"}
+                </button>
+
+                <a
+                  href={`/producto/${p.id}`}
+                  class="rounded-xl border border-white/10 px-3 py-2 font-semibold text-slate-100 hover:bg-white/10 transition"
+                >
+                  Ver
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  )}
+
   <script type="module">
     import { addToCart } from "../lib/cart-client.ts";
 
@@ -46,18 +124,24 @@ import { products } from "../lib/products";
       const buttons = document.querySelectorAll(".btn-add");
       buttons.forEach((btn) => {
         btn.addEventListener("click", () => {
+          if (btn.disabled) return;
+
           const item = {
             id: btn.getAttribute("data-id"),
             name: btn.getAttribute("data-name"),
             price: Number(btn.getAttribute("data-price")),
             image: btn.getAttribute("data-image") || undefined,
           };
+
           addToCart(item, 1);
 
           const prev = btn.textContent;
           btn.disabled = true;
           btn.textContent = "Agregado ✓";
-          setTimeout(() => { btn.disabled = false; btn.textContent = prev; }, 1200);
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = prev;
+          }, 1200);
         });
       });
     }

@@ -1,17 +1,26 @@
 ---
-import type { Product } from "types"; // ajusta si tu types.ts está en otro lugar
+import type { Product } from "types"; // puedes ajustarlo después
 
 export interface Props {
-  product: Product;
+  product: any; // por ahora, luego tipamos bien
 }
 
 const { product } = Astro.props;
+
+const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+
+// backend: imageUrl (puede venir "/uploads/xxx.jpg" o "http...")
+const imgSrc = product.imageUrl
+  ? (String(product.imageUrl).startsWith("http")
+      ? product.imageUrl
+      : `${API_BASE}${product.imageUrl}`)
+  : (product.image ?? "/images/placeholder.png"); // fallback si aún tienes mock
 ---
 
 <article class="rounded-lg border p-3 hover:shadow transition bg-white">
-  <a href={`/producto/${product.slug}`} class="block">
+  <a href={`/producto/${product.id}`} class="block">
     <img
-      src={product.image}
+      src={imgSrc}
       alt={product.name}
       class="w-full h-48 object-cover rounded-md"
       loading="lazy"
@@ -21,7 +30,7 @@ const { product } = Astro.props;
     <h3 class="mt-3 font-semibold">{product.name}</h3>
     <p class="text-sm opacity-80 line-clamp-2">{product.description}</p>
     <p class="mt-2 font-bold">
-      ${}{product.price.toLocaleString("es-CL")}
+      ${product.price.toLocaleString("es-CL")}
     </p>
   </a>
 </article>
